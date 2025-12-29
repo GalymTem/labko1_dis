@@ -2,58 +2,73 @@
 
 **Course:** Distributed Computing — Trimester 8  
 **Estimated time:** 2–3 hours  
-**Submission:** Video demo + GitHub repository
+**Submission:** Video demo (1–2 min) + GitHub repository
 
-## Overview
+## 1. Lab Objectives
 
-This project implements a simple **Remote Procedure Call (RPC)** system using **Python 3**, TCP sockets, and JSON serialization. It consists of:
-- A **server** exposing multiple remote functions
-- A **client** that sends requests with timeouts, retries, and unique request IDs
-- Deployment on **two AWS EC2 instances** (one for client, one for server)
+This lab allowed me to:
+- Implement a simple RPC protocol in Python
+- Understand RPC components: client stub, server stub, marshalling, network transport
+- Deploy a real client-server distributed application on **two AWS EC2 instances**
+- Observe communication failures, retry logic, and behavior under delays
+- Evaluate **at-least-once** semantics (achieved via client retries)
 
-The system demonstrates:
-- At-least-once semantics (via client-side retries on timeout)
-- Failure handling (artificial delay simulation)
+## 2. What I Built
 
-## Implemented Features
+I implemented a minimal RPC system with:
+- **Server** (runs on EC2 instance with public IP: `50.17.105.244`)
+  - Exposes three remote functions: `add(a, b)`, `get_time()`, `reverse_string(s)`
+  - Listens on TCP port 5000
+  - Uses JSON for marshalling/unmarshalling
 
-- **Multiple remote functions**: `add(a, b)`, `get_time()`, `reverse_string(s)`
-- **Request/response format**: JSON with `request_id` (UUID), `method`, `params`
-- **Client-side**: 2-second timeout, 3 retries, logging
-- **Server-side**: TCP socket, logging for each request/response
-- **Error handling**: Method not found, invalid requests
-- **Failure demo**: Artificial server delay (5 seconds) to trigger client retries
+- **Client** (runs on separate EC2 instance)
+  - Sends requests with unique UUID request IDs
+  - Handles 2-second timeouts + 3 retries
+  - Prints results or errors
 
-## EC2 Deployment Details
+- **Deployment**: Two t2.micro Ubuntu 22.04 instances in AWS EC2
 
-- **Server Node** (rpc-server-node)  
-  Public IP: **50.17.105.244**  
-  Runs: `server.py`
+<img width="1645" height="211" alt="image" src="https://github.com/user-attachments/assets/8e7ec758-7b19-47a4-8a99-c75968d94993" />
 
-- **Client Node** (rpc-client-node)  
-  Public IP: (replace with your actual client public IP, e.g., 3.80.125.18)  
-  Runs: `client.py`
+## 3. Pre-Lab Setup
 
-- **Port**: 5000 (TCP)  
-- **Security Group**: Inbound rules allow TCP 5000 from 0.0.0.0/0 (or your client IP)  
-- **OS**: Ubuntu 22.04
+- Launched two Ubuntu 22.04 instances:  
+  - `rpc-client-node`  
+  - `rpc-server-node` (public IP: 50.17.105.244)
 
-## Files
+- Security Group inbound rules:  
+  - SSH (port 22) from my IP  
+  - TCP 5000 from anywhere (0.0.0.0/0) for testing
 
-- `server.py` — RPC server (listens on port 5000)
-- `client.py` — RPC client (sends requests to server)
-- `README.md` — This file
+- Installed dependencies on both:
+  ```bash
+  sudo apt update
+  sudo apt install python3 python3-pip -y
 
-## How to Run
+  ping 50.17.105.244
+  nc -vz 50.17.105.244 5000
+<img width="800" height="386" alt="image" src="https://github.com/user-attachments/assets/3e8b53ab-1623-45d7-8080-04971f27395e" />
 
-### Prerequisites
+## 4. Implementation
 
-- Two AWS EC2 instances running Ubuntu 22.04
-- Python 3 installed (`sudo apt update && sudo apt install python3 python3-pip -y`)
-- Security group allows inbound TCP port 5000
+RPC Message Structure (JSON)
+- Request example::
+  ```bash
+  "request_id": "123e4567-e89b-12d3-a456-426614174000",
+  "result": 12,
+  "status": "OK"
 
-### On the Server Instance (rpc-server-node, IP: 50.17.105.244)
+- Key Features Implemented::
+  ```bash
+  Multiple methods (add, get_time, reverse_string)
+  Unique request IDs (UUID)
+  Client-side timeout (2s) + retries (3 attempts)
+  Logging on both sides
+  Failure demo support (artificial delay)
+  
+## 5 Result:
+<img width="1460" height="298" alt="image" src="https://github.com/user-attachments/assets/c8707a07-6ca0-4397-a25b-ebbafabad60d" />
 
-1. SSH into the instance:
-   ```bash
-   ssh -i rpc-key.pem ubuntu@50.17.105.244
+<img width="1334" height="230" alt="image" src="https://github.com/user-attachments/assets/57cb880b-0083-45de-8987-a56e25bcc2ae" />
+
+
