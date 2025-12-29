@@ -71,4 +71,4 @@ RPC Message Structure (JSON)
 
 <img width="1334" height="230" alt="image" src="https://github.com/user-attachments/assets/57cb880b-0083-45de-8987-a56e25bcc2ae" />
 
-
+https://github.com/GalymTem/labko1_dis/edit/main/README.md
